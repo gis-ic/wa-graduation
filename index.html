@@ -267,13 +267,9 @@
       </div>
 
       <div class="field hidden" id="f-guests">
-        <label class="q" id="guestLabel"><span data-en>How many guests will join?</span><span class="lao" data-lo>ຈະມີແຂກ ມາຮ່ວມ ຈັກຄົນ?</span> <span class="opt-note"><span data-en>(maximum 2)</span><span class="lao" data-lo>(ສູງສຸດ 2 ຄົນ)</span></span></label>
-        <div class="seg three" id="guestSeg" role="radiogroup" aria-labelledby="guestLabel">
-          <div class="opt" data-val="0" tabindex="0" role="radio" aria-checked="false">0</div>
-          <div class="opt" data-val="1" tabindex="0" role="radio" aria-checked="false">1</div>
-          <div class="opt" data-val="2" tabindex="0" role="radio" aria-checked="false">2</div>
-        </div>
-        <div class="err-msg"><span data-en>Please choose a number.</span><span class="lao" data-lo>ກະລຸນາ ເລືອກຈຳນວນ.</span></div>
+        <label class="q" for="guests"><span data-en>How many guests will join?</span><span class="lao" data-lo>ຈະມີແຂກ ມາຮ່ວມ ຈັກຄົນ?</span> <span class="opt-note"><span data-en>(all family members welcome)</span><span class="lao" data-lo>(ສະມາຊິກຄອບຄົວ ທຸກຄົນ ຍິນດີຕ້ອນຮັບ)</span></span></label>
+        <input type="number" id="guests" inputmode="numeric" min="0" step="1" placeholder="0">
+        <div class="err-msg"><span data-en>Please enter a number.</span><span class="lao" data-lo>ກະລຸນາ ໃສ່ຈຳນວນ.</span></div>
       </div>
 
       <div class="field" id="f-parent">
@@ -368,11 +364,10 @@
     if(val==='Yes'){ fGuests.classList.remove('hidden'); }
     else{
       fGuests.classList.add('hidden');
-      const gs=document.getElementById('guestSeg');
-      gs._opts.forEach(o=>{o.classList.remove('sel');o.setAttribute('aria-checked','false')});
+      document.getElementById('guests').value='';
+      fGuests.classList.remove('invalid');
     }
   });
-  wireSeg('guestSeg');
 
   /* ===== Validation + submit ===== */
   const form=document.getElementById('confirmForm');
@@ -396,8 +391,8 @@
     const childName=document.getElementById('childName').value.trim();
     const attendEl=document.querySelector('#attendSeg .opt.sel');
     const attend=attendEl?attendEl.dataset.val:'';
-    const guestEl=document.querySelector('#guestSeg .opt.sel');
-    const guests=guestEl?guestEl.dataset.val:'';
+    const guestRaw=document.getElementById('guests').value.trim();
+    const guests=guestRaw;
     const parentName=document.getElementById('parentName').value.trim();
     const contact=document.getElementById('contact').value.trim();
     const digits=contact.replace(/\D/g,'');
@@ -405,7 +400,10 @@
     let ok=true;
     setInvalid('f-child',!childName); if(!childName) ok=false;
     setInvalid('f-attend',!attend);  if(!attend) ok=false;
-    if(attend==='Yes'){ setInvalid('f-guests',!guests); if(!guests) ok=false; }
+    if(attend==='Yes'){
+      const guestBad = guestRaw==='' || isNaN(Number(guestRaw)) || Number(guestRaw)<0;
+      setInvalid('f-guests',guestBad); if(guestBad) ok=false;
+    }
     setInvalid('f-parent',!parentName); if(!parentName) ok=false;
     const contactBad = !contact || digits.length<6;
     setInvalid('f-contact',contactBad); if(contactBad) ok=false;
